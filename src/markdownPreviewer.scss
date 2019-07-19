@@ -1,0 +1,101 @@
+
+.editorBox {
+    border: 1px solid black;
+    border-radius: 4px;
+    width: 35vw;
+    min-width: 35vw;
+    margin: 30px auto;
+    display: flex;
+    align-items: stretch;
+    min-height: 20vh;
+    animation-name: minimize;
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+
+    &.editorBoxMaximized {
+        animation-name: maximize;
+        animation-duration: 1s;
+        animation-fill-mode: forwards;
+        //width: 98vw;
+        //min-width: 98vw;
+        //min-height: calc(100vh - 30px);     
+    }
+
+    #editor {
+        box-sizing: border-box;
+        border: none;
+        width: inherit;
+        min-height: inherit;
+        min-width: inherit;
+        overflow-y: hidden;
+        outline: none;    
+    }    
+}
+
+@keyframes maximize {
+    from {
+        width: default;
+        min-width: default;
+        min-height: default;
+    }
+
+    to {
+        width: 98vw;
+        min-width: 98vw;
+        min-height: calc(100vh - 30px);
+    }
+}
+
+@keyframes minimize {
+    from{
+        width: 98vw;
+        min-width: 98vw;
+        min-height: calc(100vh - 30px);
+    }
+
+    to{
+        width: default;
+        min-width: default;
+        min-height: default;
+    }
+}
+
+.hiddenDiv {
+    //display: none;
+    position: absolute;
+    left:-999em;
+    white-space: pre-wrap;
+    width: inherit;
+    min-height: inherit;
+    word-wrap: break-word;
+  }
+
+.previewBox {
+    border: 1px solid black;
+    border-radius: 4px;
+    width: 65vw;
+    min-height: 100px;
+    overflow: hidden;
+    margin: 20px auto;
+    animation-name: minimize;
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+
+    &.previewBoxMaximized {
+        animation-name: maximize;
+        animation-duration: 1s;
+        animation-fill-mode: forwards;
+        //width: 98vw;
+        //min-height: 100vh;
+    }
+}
+
+.maxEditor {
+    margin-left: 100px;
+    position: fixed;
+}
+
+.maxPreview {
+    margin-left: 400px;
+    position: fixed;
+}
