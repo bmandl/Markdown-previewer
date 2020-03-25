@@ -1,5 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import marked from 'marked';
+import { Container, Row, Col, FormControl } from 'react-bootstrap';
+import ContentEditable from 'react-contenteditable';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCompressArrowsAlt, faExpandArrowsAlt } from '@fortawesome/free-solid-svg-icons'
 import './markdownPreviewer.scss';
 
 marked.setOptions({
@@ -66,24 +70,22 @@ class App extends React.Component {
         this.state = {
             markdown: markdownDefault,
             editorMaximized: false,
-            previewMaximized: false 
+            previewMaximized: false,
+            editorMinimized: false,
+            previewMinimized: false
         }
 
         this.handleChange = this.handleChange.bind(this);
         this.maximizeEditor = this.maximizeEditor.bind(this);
         this.maximizePreview = this.maximizePreview.bind(this);
-    }
-
-    setTextAreaHeight = () => {
-        document.getElementById('editor').style.height = this.getDivHeight().toString() + 'px';
+        this.minimizeEditor = this.minimizeEditor.bind(this);
+        this.minimizePreview = this.minimizePreview.bind(this);
     }
 
     componentDidMount() {
-        this.setTextAreaHeight();
     }
 
     componentDidUpdate() {
-        this.setTextAreaHeight();
     }
 
     handleChange(e) {
@@ -92,48 +94,86 @@ class App extends React.Component {
         });
     }
 
-    getDivHeight = () => {
-        return document.getElementById('hidden').clientHeight;
-    }
-
     maximizeEditor() {
-        this.setState ({
-            editorMaximized: !this.state.editorMaximized
-        });
+        this.setState(state => ({
+            editorMaximized: !state.editorMaximized,
+            previewMaximized: !state.editorMaximized ? false : state.previewMaximized
+        }));
+        this.minimizePreview();
     }
 
     maximizePreview() {
-        this.setState({
-            previewMaximized: !this.state.previewMaximized
-        });
+        this.setState(state => ({
+            previewMaximized: !state.previewMaximized,
+            editorMaximized: !state.previewMaximized ? false : state.editorMaximized
+        }));
+        this.minimizeEditor();
+    }
+
+    minimizeEditor() {
+        this.setState(state => ({
+            editorMinimized: !state.editorMinimized
+        }))
+    }
+
+    minimizePreview() {
+        this.setState(state => ({
+            previewMinimized: !state.previewMinimized
+        }))
     }
 
     render() {
         return (
             <div>
-                <button className="maxEditor" onClick={this.maximizeEditor}>Maximize editor</button>
-                <button className="maxPreview" onClick={this.maximizePreview}>Maximize preview</button>
-                <Editor onChange={this.handleChange} markdown={this.state.markdown} maximized={this.state.editorMaximized} />
-                <Preview markdown={this.state.markdown} maximized={this.state.previewMaximized} />
+                <Editor onChange={this.handleChange} markdown={this.state.markdown} maximize={this.maximizeEditor} maximized={this.state.editorMaximized} minimized={this.state.editorMinimized} />
+                <Preview markdown={this.state.markdown} maximize={this.maximizePreview} maximized={this.state.previewMaximized} minimized={this.state.previewMinimized} />
             </div>
         );
     }
 }
 
 const Editor = (props) => {
+    const classes = ['expandable','shadow-sm', 'rounded','border'];
+    if(props.minimized) classes.push('minimized')
+    else if(props.maximized) classes.push('maximized');
     return (
-        <div>
-            <div className={"editorBox" + (props.maximized ? ' editorBoxMaximized' : '')}>
-                <textarea id="editor" value={props.markdown} onChange={props.onChange} />
-            </div>
-            <div id="hidden" className="hiddenDiv" dangerouslySetInnerHTML={{ __html: props.markdown }} />
-        </div>
+        <Container fluid={props.maximized} className={classes}>
+            <Row className="toolbar bg-light border-bottom text-primary">
+            <Col>Editor</Col>
+                <Col className="maximize">
+                    <FontAwesomeIcon icon={props.maximized ? faCompressArrowsAlt : faExpandArrowsAlt}
+                        onClick={props.maximize}
+                    />
+                </Col>
+            </Row>
+            <Row><Col><FormControl as="textarea" id="editor" value={props.markdown} onChange={props.onChange} /></Col></Row>
+        </Container>
     );
 }
 
 const Preview = (props) => {
+    const classes = ['expandable','shadow', 'rounded','border'];
+    if(props.minimized) classes.push('minimized')
+    else if(props.maximized) classes.push('maximized');
     return (
-        <div id="preview" className={"previewBox" + (props.maximized ? ' previewBoxMaximized' : '')} dangerouslySetInnerHTML={{ __html: marked(props.markdown, { renderer: renderer }) }}  />
+        <Container fluid={props.maximized} className={classes}>
+            <Row className="toolbar bg-light border-bottom text-primary">
+                <Col>Preview</Col>
+                <Col className="maximize">
+                    <FontAwesomeIcon icon={props.maximized ? faCompressArrowsAlt : faExpandArrowsAlt}
+                        onClick={props.maximize}
+                    />
+                </Col>
+            </Row>
+            <Row>
+                <Col>
+                    <ContentEditable id="preview"
+                        html={marked(props.markdown, { renderer: renderer })}
+                        disabled={true}
+                    />
+                </Col>
+            </Row>
+        </Container>
     );
 }
 
